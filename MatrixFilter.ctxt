@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.target=MatrixFilter
+comment0.text=\r\n\ Defines\ filter\ functionality\ for\ filters\ that\ use\ matrixes\r\n\ \r\n\ @author\ Benigno\ Chihuahua\ \r\n\ @version\ 1/26/2018\r\n
+comment1.params=fMat\ scale
+comment1.target=MatrixFilter(int[][],\ boolean)
+comment2.params=
+comment2.target=MatrixFilter()
+comment3.params=pi
+comment3.target=void\ filter(PixelImage)
+comment4.params=imageData\ row\ col\ fMat\ channel\ divideBySixteen
+comment4.target=int\ calculateWeightedAverage(Pixel[][],\ int,\ int,\ int[][],\ MatrixFilter.Color,\ boolean)
+comment5.params=val
+comment5.target=int\ picVal(int)
+numComments=6

@@ -4,225 +4,131 @@ import java.awt.image.*;
 import javax.swing.*;
 import java.io.*;
 
-/**
- * A PhotoShop like application for filtering images
- * 
- * @author Richard Dunn
- * @version March 2, 2002
+/*
+ *SnapShop is the main user-image point of interaction, displays the filtered or unfiltered
+ *image or camera feed to the user.  
+ *
+ *@author Benigno Vargas
+ *@version 0.1.0
  */
+
 public class SnapShop extends JFrame
 {
-    FileLoader fl;
-    FilterButtons fb;
-    ImagePanel ip;
-    RenderingDialog rd;
 
-    /**
-     * Constructor for objects of class SnapShop
-     */
-    public SnapShop()
-    {
-        super("CSE 142 - SnapShop");
+	private ImageFilterPanel imageFilters;
+	private ImagePanel ip;
+	private FileLoader fl;
 
-        this.addWindowListener(new WindowAdapter () {
-            public void windowClosing(WindowEvent e) { System.exit(0); }
-        });
+	/**
+	 *Constructor for subset panels of SnapShop frame
+	 */
+	public SnapShop()
+	{
+		super("CameraFun");
 
-        ip = new ImagePanel(this);
-        this.getContentPane().add(ip, BorderLayout.CENTER);
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) { System.exit(0); }	
+		});
 
-        fl = new FileLoader(this);
-        this.getContentPane().add(fl, BorderLayout.NORTH);
+		ip = new ImagePanel(this);
+		this.getContentPane().add(ip, BorderLayout.CENTER);
+	
+		imageFilters = new ImageFilterPanel(ip);
+		this.getContentPane().add(imageFilters, BorderLayout.WEST);
+		
+		fl = new FileLoader(this);
+		this.getContentPane().add(fl,BorderLayout.NORTH);
+		
+		SnapShopConfiguration.configure(this);
 
-        fb = new FilterButtons(this);
-        this.getContentPane().add(fb, BorderLayout.WEST);
+		this.pack();
+		this.setVisible();
+	}
 
-        rd = new RenderingDialog(this);
+	private class ImagePanel extends JPanel
+	{
+		private BufferedImage image;
+		private SnapShop parentFrame;
 
-        SnapShopConfiguration.configure(this);
+		public ImagePanel(SnapShop s)
+		{
+			image = null;
+			parentFrame = s;
+		}
 
-        this.pack();
-        this.setVisible(true);              // this.show();
-    }
+		public void loadImage(String filename) {
+			Image img = Toolkit.getDefaultToolkit().getImage(filename);
+			try{
 
-    private class FileLoader extends JPanel implements ActionListener {
-        private JTextArea filenameBox;
-        private ImagePanel ip;
-        private SnapShop s;
+			}catch(Exception e) {}
+			int width = img.getWidth(this);
+			int height = img.getHeight(this);
+			image = new BufferedImage(width, height,BufferedImage.TYPE_INT_RGB);
+			Graphics2D imageContext = image.createGraphics();
+			imageContext.drawImage(img,0,0,null);
+			setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
+			revalidate();
+			parentFrame.pack();
+			parentFrame.repaint();
+		}
 
-        public FileLoader(SnapShop s) {
-            super(new FlowLayout());
+		public void paint(Graphics g) {
+			super.paint(g);
+			if(image != null)
+				g.drawImage(image, 0, 0, this);
+		}	
 
-            this.s = s;
-            this.ip = s.getImagePanel();
-            
-            add(new JLabel("Enter file name: "));
-            
-            filenameBox = new JTextArea(1, 50);
-            add(filenameBox);
+		public void applyFilter(Filter f) {
+			if(image == null)
+				return;
+			PixelImage newImage = new PixelImage(image);
+			f.filter(newImage);
+			image = newImage.getImage();
+			repaint();
+		}
 
-            JButton loadButton = new JButton("Load");
-            loadButton.addActionListener(this);
-            add(loadButton);
-        }
+	}
+	
+	public class FileLoader extends JPanel implements ActionListener {
+		
+		private JTextArea filenameBox;
+		private ImagePanel ip;
+		private SnapShop s;
 
-        public void actionPerformed(ActionEvent e) {
-            String filename = filenameBox.getText();
-            try {
-                ip.loadImage(filename);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(s,
-                    "Could not open file",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        }
+		public FileLoader(SnapShop s)
+		{
+			super(new FlowLayout());
 
-        public void setDefaultFilename(String filename) {
-            filenameBox.setText(filename);
-        }
-    }
+			this.s = s;
+			this.ip = s.getImagePanel();
+			
+			add(new JLabel("Enter file name: "));
 
-    private class FilterButtons extends JPanel {
-        private SnapShop s;
-        private ImagePanel ip;
+			filenameBox = new JTextArea(1,50);
+			add(filenameBox);
 
-        public FilterButtons(SnapShop s) {
-            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            this.s = s;
-            this.ip = s.getImagePanel();;
-        }
+			JButton loadButton = new JButton("Load");
+			loadButton.addActionListener(this);
+			add(loadButton);
+		}
 
-        public void addFilter(Filter f, String description) {
-            JButton filterButton = new JButton(description);
-            filterButton.addActionListener(new FilterButtonListener(this, f));
-            add(filterButton);
-            s.pack();
-        }
+		public void actionPerformed(ActionEvent e)
+		{
+			String fileName = filenameBox.getText();
+			try {
 
-        public void applyFilter(Filter f) {
-            try {
-                ip.applyFilter(f);
-            } catch (Exception e) {
-                e.printStackTrace(System.out);
-            }
-        }
+			} catch(Exception ex) {
+				JOptionPane.showMessageDialog(s,
+						"Could not open file",
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		}
 
-        private class FilterButtonListener implements ActionListener {
-            private FilterButtons fb;
-            private Filter f;
+		public void setDefaultFilename(String fileName) {
+			filenameBox.setText(filename);
+		}
 
-            public FilterButtonListener(FilterButtons fb, Filter f) {
-                this.fb = fb;
-                this.f = f;
-            }
+	}
 
-            public void actionPerformed(ActionEvent e) {
-                fb.applyFilter(f);
-            }
-        }                
-    }
-
-    private class ImagePanel extends JPanel {
-        private BufferedImage bi;
-        private SnapShop s;
-
-        public ImagePanel(SnapShop s) {
-            bi = null;
-            this.s = s;
-        }
-         
-        public void loadImage(String filename) {             
-            Image img = Toolkit.getDefaultToolkit().getImage(filename);
-            try {
-                MediaTracker tracker = new MediaTracker(this);
-                tracker.addImage(img, 0);
-                tracker.waitForID(0);
-            } catch (Exception e) {}
-            int width = img.getWidth(this);
-            int height = img.getHeight(this);
-            bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            Graphics2D biContext = bi.createGraphics();
-            biContext.drawImage(img, 0, 0, null);
-            setPreferredSize(new Dimension(bi.getWidth(), bi.getHeight()));
-            revalidate();
-            s.pack();
-            s.repaint();
-        }
-        
-        public void paint(Graphics g) {
-            super.paint(g);
-            if (bi != null) {
-                g.drawImage(bi, 0, 0, this);
-            }
-        }
-
-        public void applyFilter(Filter f) {
-            if (bi == null) {
-                return;
-            }
-            PixelImage newImage = new PixelImage(bi);
-            s.showWaitDialog();
-            f.filter(newImage);
-            s.hideWaitDialog();
-            bi = newImage.getImage();
-            repaint();
-        }
-    }
-
-    private class RenderingDialog extends JFrame {
-        public RenderingDialog(JFrame parent) {
-            super("Please Wait");
-            Point p = parent.getLocation();
-            setLocation((int)p.getX() + 100, (int)p.getY() + 100);
-            this.getContentPane().add(new JLabel("Applying filter, please wait..."), BorderLayout.CENTER);
-        }
-    }
-
-    /**
-     * Add a filter to the SnapShop interface.  Creates a button and
-     * links it to the filter.
-     * @param f The filter to apply
-     * @param description English description of the filter
-     */
-    public void addFilter(Filter f, String description) {
-        fb.addFilter(f, description);
-    }
-
-    /**
-     * IGNORE THIS METHOD
-     */
-    protected void showWaitDialog() {
-        rd.pack();
-        rd.setVisible(true);        // rd.show();
-    }
-
-    /**
-     * IGNORE THIS METHOD
-     */
-    protected void hideWaitDialog() {
-        rd.setVisible(false);       // rd.hide();
-    }
-
-    /**
-     * IGNORE THIS METHOD
-     */
-    protected ImagePanel getImagePanel() {
-        return ip;
-    }
-
-    /**
-     * Set the default filename to appear in the box
-     * @param filename The filename
-     */
-    public void setDefaultFilename(String filename) {
-        fl.setDefaultFilename(filename);
-    }
-
-    /**
-     * Open a SnapShop
-     */
-    public static void test() {
-        SnapShop s = new SnapShop();
-    }
 }

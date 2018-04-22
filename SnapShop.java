@@ -33,7 +33,7 @@ public class SnapShop extends JFrame
 		ip = new ImagePanel(this);
 		this.getContentPane().add(ip, BorderLayout.CENTER);
 	
-		imageFilters = new ImageFilterPanel(ip);
+		imageFilters = new ImageFilterPanel(this);
 		this.getContentPane().add(imageFilters, BorderLayout.WEST);
 		
 		fl = new FileLoader(this);
@@ -42,52 +42,16 @@ public class SnapShop extends JFrame
 		SnapShopConfiguration.configure(this);
 
 		this.pack();
-		this.setVisible();
+		this.setVisible(true);
 	}
 
-	private class ImagePanel extends JPanel
+	public static void main(String[] args)
 	{
-		private BufferedImage image;
-		private SnapShop parentFrame;
 
-		public ImagePanel(SnapShop s)
-		{
-			image = null;
-			parentFrame = s;
-		}
-
-		public void loadImage(String filename) {
-			Image img = Toolkit.getDefaultToolkit().getImage(filename);
-			try{
-
-			}catch(Exception e) {}
-			int width = img.getWidth(this);
-			int height = img.getHeight(this);
-			image = new BufferedImage(width, height,BufferedImage.TYPE_INT_RGB);
-			Graphics2D imageContext = image.createGraphics();
-			imageContext.drawImage(img,0,0,null);
-			setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
-			revalidate();
-			parentFrame.pack();
-			parentFrame.repaint();
-		}
-
-		public void paint(Graphics g) {
-			super.paint(g);
-			if(image != null)
-				g.drawImage(image, 0, 0, this);
-		}	
-
-		public void applyFilter(Filter f) {
-			if(image == null)
-				return;
-			PixelImage newImage = new PixelImage(image);
-			f.filter(newImage);
-			image = newImage.getImage();
-			repaint();
-		}
-
+		SnapShop s = new SnapShop();
 	}
+	
+	
 	
 	public class FileLoader extends JPanel implements ActionListener {
 		
@@ -116,7 +80,7 @@ public class SnapShop extends JFrame
 		{
 			String fileName = filenameBox.getText();
 			try {
-
+				ip.loadImage(fileName);
 			} catch(Exception ex) {
 				JOptionPane.showMessageDialog(s,
 						"Could not open file",
@@ -126,9 +90,24 @@ public class SnapShop extends JFrame
 		}
 
 		public void setDefaultFilename(String fileName) {
-			filenameBox.setText(filename);
+			filenameBox.setText(fileName);
 		}
 
+	}
+
+	public void addFilter(Filter f, String name)
+	{
+		imageFilters.addImageFilter(f);
+	}
+
+	public void setDefaultFilename(String name)
+	{
+		fl.setDefaultFilename(name);
+	}
+	public ImagePanel getImagePanel() 
+	{
+
+		return ip;
 	}
 
 }

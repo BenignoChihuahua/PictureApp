@@ -1,8 +1,0 @@
-#BlueJ class context
-comment0.target=LightenBy10Filter
-comment0.text=\r\n\ A\ filter\ to\ lighten\ image\r\n\ \r\n\ @author\ Benigno\ Chihuahua\ \r\n\ @version\ 1/26/2018\r\n
-comment1.params=pi
-comment1.target=void\ filter(PixelImage)
-comment2.params=val
-comment2.target=int\ getPicVal(int)
-numComments=3

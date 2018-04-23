@@ -50,19 +50,46 @@ public class ImagePanel extends JPanel
 		s.repaint();
 	}
 
+	public void loadBufferedImage(BufferedImage image)
+	{
+		if(image == null)
+			return ;
+		imageWidth = image.getWidth();
+		imageHeight = image.getHeight();
+
+		unfilteredImage = new BufferedImage(imageWidth, imageHeight, image.getType());			
+		filteredImage = new BufferedImage(imageWidth, imageHeight, image.getType());
+		
+		Graphics2D imageContext = unfilteredImage.createGraphics();
+		imageContext.drawImage(image,0, 0,null);
+		setPreferredSize(new Dimension(unfilteredImage.getWidth(), unfilteredImage.getHeight()));
+		
+		Graphics2D fimageContext = filteredImage.createGraphics();
+		fimageContext.drawImage(image,0,0,null);
+		setPreferredSize(new Dimension(filteredImage.getWidth(), filteredImage.getHeight()));
+
+		revalidate();
+		s.pack();
+		s.repaint();
+	}
 
 	public void paint(Graphics g) {
 		super.paint(g);
+		
 		if(filteredImage != null)
+		{
 			g.drawImage(filteredImage, 0, 0, this);
+			loadBufferedImage(filteredImage);
+		}
 	}
 
 	public void applyFilter(Filter f)
 	{
 		if(unfilteredImage == null)
 			return;
+
 		BufferedImage unfiltered = copyImage(unfilteredImage);
-      		PixelImage newImage = new PixelImage(unfiltered);
+      	PixelImage newImage = new PixelImage(unfiltered);
 		f.filter(newImage);
 		filteredImage = newImage.getImage();
 		repaint();

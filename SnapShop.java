@@ -18,7 +18,8 @@ public class SnapShop extends JFrame
 	private ImageFilterPanel imageFilters;
 	private ImagePanel ip;
 	private FileLoader fl;
-
+	private WebCam webCamera;
+	private Thread cameraFeed;
 	/**
 	 *Constructor for subset panels of SnapShop frame
 	 */
@@ -38,6 +39,10 @@ public class SnapShop extends JFrame
 		
 		fl = new FileLoader(this);
 		this.getContentPane().add(fl,BorderLayout.NORTH);
+		
+		//webCamera = new WebCam(this);
+		//cameraFeed = new Thread(webCamera);
+
 		
 		SnapShopConfiguration.configure(this);
 
@@ -79,6 +84,7 @@ public class SnapShop extends JFrame
 		public void actionPerformed(ActionEvent e)
 		{
 			String fileName = filenameBox.getText();
+			
 			try {
 				ip.loadImage(fileName);
 			} catch(Exception ex) {
@@ -108,6 +114,11 @@ public class SnapShop extends JFrame
 	{
 
 		return ip;
+	}
+
+	public ImageFilterPanel getImageFilters()
+	{
+		return imageFilters;
 	}
 
 }

@@ -15,9 +15,11 @@ public class ImageFilterPanel extends JScrollPane
 
 	
 	private ImagePanel imageDisplay;
-	private Filter currentImageFilter;
-	private static JPanel enclosingPanel = new JPanel();;
-	
+	private Filter videoFilter;
+	private static JPanel enclosingPanel = new JPanel();
+	private boolean inCameraMode = false;
+
+
 	private static boolean newImage = false;
 	private static final int imageWidth = 250;
 	private static final int imageHeight = 125;
@@ -28,7 +30,7 @@ public class ImageFilterPanel extends JScrollPane
 		enclosingPanel.setLayout(new BoxLayout(enclosingPanel, BoxLayout.Y_AXIS));	
 		super.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		imageDisplay = s.getImagePanel();
-
+		videoFilter = new NormalFilter();
 		
 	}
 
@@ -44,6 +46,7 @@ public class ImageFilterPanel extends JScrollPane
 		private BufferedImage filteredImage;
 		private ImageFilterPanel imagePanel;
 		private boolean hasBeenFiltered;
+
 
 		public ImageFilterButton(Filter f, ImageFilterPanel imagePanel)
 		{
@@ -96,11 +99,23 @@ public class ImageFilterPanel extends JScrollPane
 
 	public void applyFilter(Filter f)
 	{
+		if(inCameraMode)
+			videoFilter = f;
 		try
 		{
 			imageDisplay.applyFilter(f);
 		}catch(Exception e) {System.out.println("Failure in Filtering");}
 
+	}
+
+	public Filter getCameraFilter()
+	{
+		return videoFilter;
+	}
+
+	public void setCameraMode(boolean state)
+	{
+		inCameraMode = state;
 	}
 
 	public static void receivedNewImage(boolean b)
@@ -137,10 +152,6 @@ public class ImageFilterPanel extends JScrollPane
 		return imageDisplay.getFilteredImage();
 	}
 
-	public Filter getDesiredImageFilter()
-	{
-		return currentImageFilter;
-	}
 
 
 }

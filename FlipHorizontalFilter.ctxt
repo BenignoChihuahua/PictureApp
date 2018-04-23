@@ -1,6 +1,0 @@
-#BlueJ class context
-comment0.target=FlipHorizontalFilter
-comment0.text=\r\n\ Filter\ that\ flips\ the\ image\ horizontally.\r\n\ \r\n\ @author\ Benigno\ Chihuahua\ \r\n\ @version\ 1/26/2018\r\n
-comment1.params=pi
-comment1.target=void\ filter(PixelImage)
-numComments=2

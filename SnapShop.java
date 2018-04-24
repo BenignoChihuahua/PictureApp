@@ -18,8 +18,10 @@ public class SnapShop extends JFrame
 	private ImageFilterPanel imageFilters;
 	private ImagePanel ip;
 	private FileLoader fl;
+	private CameraInterface ci;
 	private WebCam webCamera;
 	private Thread cameraFeed;
+	
 	/**
 	 *Constructor for subset panels of SnapShop frame
 	 */
@@ -40,8 +42,11 @@ public class SnapShop extends JFrame
 		fl = new FileLoader(this);
 		this.getContentPane().add(fl,BorderLayout.NORTH);
 		
-		//webCamera = new WebCam(this);
-		//cameraFeed = new Thread(webCamera);
+		ci = new CameraInterface(this);
+		this.getContentPane().add(ci, BorderLayout.SOUTH);
+
+		webCamera = new WebCam(this);
+		cameraFeed = new Thread(webCamera);
 
 		
 		SnapShopConfiguration.configure(this);
@@ -101,6 +106,42 @@ public class SnapShop extends JFrame
 
 	}
 
+	public class CameraInterface extends JPanel implements ActionListener {
+		
+		private JButton takeImageButton;
+		private WebCam webCamera;
+		private SnapShop s;
+
+		public CameraInterface(SnapShop s)
+		{
+			super(new FlowLayout());
+
+			this.s = s;
+			webCamera = s.getWebCam();
+			
+			add(new JLabel("Enter file name: "));
+
+
+			takeImageButton = new JButton("Capture");
+			takeImageButton.addActionListener(this);
+			add(takeImageButton);
+		}
+
+		public void actionPerformed(ActionEvent e)
+		{
+			
+			try {
+				webCamera.takeImage();
+			} catch(Exception ex) {
+				JOptionPane.showMessageDialog(s,
+						"Could not Capture Image",
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		}
+
+	}
+
 	public void addFilter(Filter f, String name)
 	{
 		imageFilters.addImageFilter(f);
@@ -109,6 +150,11 @@ public class SnapShop extends JFrame
 	public void setDefaultFilename(String name)
 	{
 		fl.setDefaultFilename(name);
+	}
+
+	public WebCam getWebCam()
+	{
+		return webCamera;
 	}
 	public ImagePanel getImagePanel() 
 	{

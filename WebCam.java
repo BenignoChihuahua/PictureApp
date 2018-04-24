@@ -25,6 +25,9 @@ public class WebCam implements Runnable
 	private BufferedImage videoFrame;
 	private ImagePanel imagePanel;
 	private ImageFilterPanel imageFilters;
+	private BufferedImage takenFrame;
+	private boolean imageHasBeenTaken = false;
+	private boolean hasLoadedImage = false;
 
 	public WebCam(SnapShop s)
 	{
@@ -40,8 +43,16 @@ public class WebCam implements Runnable
 	{
 		while(true)
 		{
-			
-			imagePanel.loadBufferedImage(getLatestFrame());
+			if(imageHasBeenTaken)
+			{
+				if(!hasLoadedImage)
+				{
+					imagePanel.loadBufferedImage(takenFrame);
+					hasLoadedImage = true;
+				}
+			}	
+			else
+				imagePanel.loadBufferedImage(getLatestFrame());
 		}
 	}
 
@@ -76,6 +87,12 @@ public class WebCam implements Runnable
 			//Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
 		}
 		return matToBufferedImage(frame);
+	}
+
+	public void takeImage()
+	{
+		imageHasBeenTaken = true;
+		takenFrame = getLatestFrame();
 	}
 
 
